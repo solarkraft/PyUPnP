@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from SOAPpy import parseSOAPRPC, buildSOAP
+#from SOAPpy import parseSOAPRPC, buildSOAP
 import time
 from twisted.internet import reactor
 from twisted.web.error import UnsupportedMethod
