@@ -161,12 +161,9 @@ class ServiceActionWrapper:
             arguments = self.service.actions[self.name]
 
             # Set arguments 'parameterName' attribute from function spec
-            # self.func_params = self.func.func_code.co_varnames
+            self.func_params = func.__code__.co_varnames
 
-            # func only supplies an actionName. we will have to find out its parameters from Service.actions, classifying by in/out. 
-            # example for Browse: ('self', 'objectID', 'browseFlag', 'browseFilter', 'startingIndex', 'requestedCount', 'sortCriteria')
-
-            self.func_params = []
+            actions = service.actions
             
             for x in range(1, len(self.func_params)):
                 j = x - 1
