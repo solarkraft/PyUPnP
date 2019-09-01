@@ -1,6 +1,5 @@
 # PyUPnP - Simple Python UPnP device library built in Twisted
 # Copyright (C) 2013  Dean Gardiner <gardiner91@gmail.com>
-# Copyright (C) 2019  Lauri Peltonen
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,7 +31,7 @@ SSDP_PORT = 1900
 
 
 class SSDP:
-    def __init__(self, device, interfaces, bind):
+    def __init__(self, device):
         """SSDP Client/Listener
 
         :type device: Device
@@ -51,21 +50,17 @@ class SSDP:
         for service in self.device.services:
             self.targets.append(service.serviceType)
 
-        self.interfaces = interfaces
-        #self.interfaces = [
-        #    '',
-        #    get_default_v4_address()
-        #]
-
-        # Which interface the upnpn server is bind to
-        self.bind = bind
+        self.interfaces = [
+            '',
+            get_default_v4_address()
+        ]
 
         _clients = []
         for interface in self.interfaces:
-            _clients.append(SSDP_Client(self, interface, bind))
+            _clients.append(SSDP_Client(self, interface))
         self.clients = SSDP_ClientsInterface(_clients)
 
-        self.listener = SSDP_Listener(self, self.interfaces, bind)
+        self.listener = SSDP_Listener(self, self.interfaces)
 
     def listen(self):
         Logr.debug("listen()")
@@ -106,15 +101,13 @@ class SSDP_ClientsInterface:
 
 
 class SSDP_Client(DatagramProtocol):
-    def __init__(self, ssdp, interface, bind, notifyInterval=1800):
+    def __init__(self, ssdp, interface, notifyInterval=1800):
         self.ssdp = ssdp
         self.interface = interface
 
         self.notifySequenceInterval = notifyInterval
         self.notifySequenceLoop = task.LoopingCall(self._notifySequenceCall)
         self.running = False
-
-        self.bind = bind
 
     def listen(self):
         if self.running:
@@ -162,8 +155,7 @@ class SSDP_Client(DatagramProtocol):
         if self.ssdp.device.bootID is None:
             self.ssdp.device.bootID = int(time.time())
 
-        #location = self.ssdp.device.getLocation(get_default_v4_address())
-        location = self.ssdp.device.getLocation(self.bind)
+        location = self.ssdp.device.getLocation(get_default_v4_address())
 
         if uuid is None:
             uuid = self.ssdp.device.uuid
@@ -240,15 +232,13 @@ class SSDP_Client(DatagramProtocol):
 
 
 class SSDP_Listener(DatagramProtocol):
-    def __init__(self, ssdp, interfaces, bind, responseExpire=900):
+    def __init__(self, ssdp, interfaces, responseExpire=900):
         self.ssdp = ssdp
         self.interfaces = interfaces
         self.responseExpire = responseExpire
 
         self.running = False
         self.rand = Random()
-
-        self.bind = bind
 
     def listen(self):
         if self.running:
@@ -336,8 +326,7 @@ class SSDP_Listener(DatagramProtocol):
         if address == '127.0.0.1':
             location = self.ssdp.device.getLocation('127.0.0.1')
         else:
-            #location = self.ssdp.device.getLocation(get_default_v4_address())
-            location = self.ssdp.device.getLocation(self.bind)
+            location = self.ssdp.device.getLocation(get_default_v4_address())
 
             # TODO:
             # Assume the UPnP server is also listening on the same interface from
